@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Launch Radar</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="hero">
+  <div class="radar-disc" aria-hidden="true"><span class="sweep"></span><span class="blip b1"></span><span class="blip b2"></span><span class="blip b3"></span></div>
+  <div class="hero-text">
+    <p class="eyebrow">Pre-token protocols &middot; ranked by implied value</p>
+    <h1>Token Launch Radar</h1>
+    <p class="lede">If a protocol with no token issued one today, what would it be worth? This board prices every pre-token protocol from its own record &mdash; TVL, growth, age and breadth &mdash; against the market caps live tokens actually trade at. It does not predict whether or when a token is issued.</p>
+    <p class="snapshot-line" id="snapshot-line">Snapshot loading&hellip;</p>
+    <div class="chips" id="chips"></div>
+  </div>
+</header>
+
+<main>
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button class="tab active" id="tab-board" role="tab" aria-selected="true">Ranked board</button>
+    <button class="tab" id="tab-live" role="tab" aria-selected="false">Live tokens &middot; already trading</button>
+  </nav>
+
+  <section id="view-board" role="tabpanel" aria-labelledby="tab-board">
+    <div class="controls">
+      <label class="ctl search">Search
+        <input id="q" type="search" placeholder="Protocol, category or chain&hellip;" autocomplete="off">
+      </label>
+      <label class="ctl">Category
+        <select id="f-cat"><option value="">All categories</option></select>
+      </label>
+      <label class="ctl">Chain
+        <select id="f-chain"><option value="">All chains</option></select>
+      </label>
+      <label class="ctl">Min TVL
+        <select id="f-tvl">
+          <option value="0">Any TVL</option>
+          <option value="5000000">$5M+</option>
+          <option value="50000000" selected>$50M+ watchlist floor</option>
+          <option value="100000000">$100M+</option>
+          <option value="500000000">$500M+</option>
+          <option value="1000000000">$1B+</option>
+        </select>
+      </label>
+      <label class="ctl">Growth
+        <select id="f-growth">
+          <option value="all">All</option>
+          <option value="gainers">Gainers (7d &gt; 0)</option>
+          <option value="losers">Losers (7d &lt; 0)</option>
+        </select>
+      </label>
+      <label class="ctl check"><input id="f-watch" type="checkbox"> Watchlist only</label>
+    </div>
+    <p class="count" id="count"></p>
+    <div class="table-wrap">
+      <table id="board">
+        <thead><tr>
+          <th data-sort="rank" class="sortable sorted-desc">Rank</th>
+          <th data-sort="name" class="sortable">Protocol</th>
+          <th data-sort="tvl_usd" class="sortable num">TVL</th>
+          <th data-sort="change_7d" class="sortable num">7d</th>
+          <th data-sort="age_days" class="sortable num">Age</th>
+          <th data-sort="implied_value_usd" class="sortable num">Implied value</th>
+          <th>Why</th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="hint">Click any row for the full model breakdown and farm plan. Click a column header to sort.</p>
+  </section>
+
+  <section id="view-live" role="tabpanel" aria-labelledby="tab-live" hidden>
+    <p class="live-note">These protocols already have a token trading. Their market caps are the market&rsquo;s own values &mdash; they are never ranked on this board, they are the comparables the board is priced against.</p>
+    <div class="table-wrap">
+      <table id="live-table">
+        <thead><tr><th>Protocol</th><th class="num">TVL</th><th class="num">Market cap</th><th class="num">Mcap / TVL</th><th class="num">7d</th></tr></thead>
+        <tbody id="live-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="method" id="method">
+    <h2>How the radar prices a token that does not exist yet</h2>
+    <p class="formula">Implied value = TVL &times; comp multiple &times; growth &times; maturity &times; breadth</p>
+    <ul>
+      <li><strong>Comp multiple.</strong> The median market-cap-to-TVL ratio of live-token protocols in the same category. When a category has fewer than 3 live comparables, the global median across all live tokens is used instead. Clamped to 0.05&ndash;1.00.</li>
+      <li><strong>Growth.</strong> 1 + (7-day TVL change, clamped to &minus;60%..+120%) &divide; 100 &times; 0.5. A protocol growing fast is worth more than one shrinking at the same TVL.</li>
+      <li><strong>Maturity.</strong> 0.6 + min(age in days, 1095) &divide; 1095 &times; 0.4. Older protocols count for more; unknown age counts as 365 days.</li>
+      <li><strong>Breadth.</strong> 1 + min(chains &minus; 1, 5) &times; 0.02. Each extra chain, up to five, adds 2%.</li>
+    </ul>
+    <p>The snapshot is a frozen DefiLlama pull of every protocol at or above $5M TVL, fetched 2026-11-14. The watchlist is the 40 pre-token protocols at or above the $50M floor. The board ranks every rankable pre-token protocol in the snapshot, not just the watchlist. Wrapped, staked, bridged and exchange products are excluded, as are versioned pools. Implied value is this entry&rsquo;s claim, not make.fun&rsquo;s, and it is not investment advice.</p>
+  </section>
+</main>
+
+<div class="drawer-backdrop" id="backdrop" hidden></div>
+<aside class="drawer" id="drawer" aria-label="Protocol detail" hidden>
+  <button class="drawer-close" id="drawer-close" aria-label="Close detail">&times;</button>
+  <div id="drawer-body"></div>
+</aside>
+
+<footer>Token Launch Radar &middot; model radar-2 &middot; implied values are this entry&rsquo;s claim, not make.fun&rsquo;s.</footer>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
